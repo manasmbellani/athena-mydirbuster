@@ -28,7 +28,7 @@ def main():
                         help="User Agent string ")
     parser.add_argument("-ll", "--log-level", action="store", default=logging.DEBUG,
                         help="Logging level")
-    parser.add_argument("-f", "--outfile", action="store", default="out-http-paths.txt",
+    parser.add_argument("-o", "--outfile", action="store", default="out-http-paths.txt",
                         help="Output file to write the file paths to")
     parser.add_argument("-r", "--recursive", action="store_true", help="Recursively target indefinitely")
 
@@ -55,9 +55,10 @@ def main():
         return 1
 
     logger.debug("Reading Wordlist file...")
-    with open(args.wordlist, "r+") as f:
+    with open(args.wordlist, "rb+") as f:
         for line in f.readlines():
-            wordlist.append(line.strip())
+            word = line.decode('utf-8', errors='ignore').strip()
+            wordlist.append(word)
 
     logger.debug("Starting checks on URL: {}".format(url))
     with open(args.outfile, 'w+') as of:
@@ -84,8 +85,9 @@ def check_path(logger, url_queue, url, user_agent, outfile_obj):
         resp = requests.get(url, headers=headers, verify=False, 
                             allow_redirects=True, timeout=2)
         if 200 <= resp.status_code < 400:
+            status_code = resp.status_code
             resp_len = len(resp.text)
-            logger.info("Found path: {}, {}: {}".format(resp.status_code, resp_len, url))
+            logger.info("Found path: {}, {}: {}".format(status_code, resp_len, url))
 
             logger.debug("Add url: {} as discovered and for further recursive checks".format(url))
             if url not in url_queue:
@@ -93,7 +95,7 @@ def check_path(logger, url_queue, url, user_agent, outfile_obj):
             
             if outfile_obj:
                 logger.debug("Writing URL to output file")
-                outfile_obj.write(url + '\n')
+                outfile_obj.write("{}, {}: {}".format(status_code, resp_len, url) + '\n')
                 outfile_obj.flush()
 
     except Exception as e:
