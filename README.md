@@ -14,6 +14,6 @@ pip install -r requirements.txt
 ## Examples
 Following script is used to make custom calls to domain: `www.hotmail.com` using the specific wordlist in a recursive fashion:
 ```
-./my_dir_buster.py -t "www.hotmail.com" -w /tmp/wordlist.txt -ll 20 -r
+python3 ./mydirbuster.py -t "www.hotmail.com" -w /tmp/wordlist.txt -ll 20 -r
 ```
 
